@@ -8,17 +8,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class Evaluator {
 	
-	static List<Integer> tScore = new ArrayList(); //3
-	static List<Integer> hScore = new ArrayList(); //1
-	static List<Integer> lScore = new ArrayList(); //2
-	static List<Integer> wScore = new ArrayList(); //3
-	static List<Integer> pScore = new ArrayList(); //1
+	static List<Integer> tScore = new ArrayList<Integer>(); //3
+	static List<Integer> hScore = new ArrayList<Integer>(); //1
+	static List<Integer> lScore = new ArrayList<Integer>(); //2
+	static List<Integer> wScore = new ArrayList<Integer>(); //3
+	static List<Integer> pScore = new ArrayList<Integer>(); //1
 
-	static int eTC;
-	static int eHC;
-	static int eLC;
-	static int eWC;
-	static int ePC;
+//	static int eTC;
+//	static int eHC;
+//	static int eLC;
+//	static int eWC;
+//	static int ePC;
 
 	private int ranTemp;
 	private int ranHum;
@@ -30,7 +30,7 @@ public class Evaluator {
 	private int pHum = 60;
 	private int pLight = 10;
 	private int pWater = 200;
-	private int pPes = 50;
+	private int pPes = 20;
 
 	private int ai;
 
@@ -45,13 +45,17 @@ public class Evaluator {
 
 //		temp = 20;
 
-		ranTemp = random(10, 30);
+		ranTemp = random(10, 40);
 
 		System.out.println(ranTemp);
 
-		eTC = eTC + 1;
+//		eTC = eTC + 1;
 
 		tScore.add(100 - Math.abs((pTemp - temp) * (ranTemp - ai) / 10));
+		//1-20
+		//1-40
+		//1-5
+		
 
 		System.out.println(tScore.toString());
 		return "evaluated";
@@ -59,15 +63,18 @@ public class Evaluator {
 
 	public String evaluateHum(int hum) {
 
-//		hum = 70;
+//		hum = 60;
 
-		ranHum = random(10, 25);
+		ranHum = random(10, 20);
 
 		System.out.println(ranHum);
 
-		eHC = eHC + 1;
+//		eHC = eHC + 1;
 
 		hScore.add(100 - Math.abs((pHum - hum) * (ranHum - ai) / 10));
+		//10-90
+		//0-50
+		//1-2
 
 		System.out.println(hScore.toString());
 		return "evaluated";
@@ -75,53 +82,59 @@ public class Evaluator {
 
 	public String evaluateLight(int light) {
 
-//		light = 12;
+//		light = 10;
 
-		ranLight = random(5, 20);
+		ranLight = random(10, 90);
 
 		System.out.println(ranLight);
 
-		eLC = eLC + 1;
+//		eLC = eLC + 1;
 
 		lScore.add(100 - Math.abs((pLight - light) * (ranLight - ai) / 10));
-
+		//1-15
+		//0-9
+		
+		
 		System.out.println(lScore.toString());
 		return "evaluated";
 	}
 
 	public String evaluateWater(int water) {
 
-//		water = 100;
+//		water = 200;
 
-		ranWater = random(5, 30);
+		ranWater = random(1, 5);
 
 		System.out.println(ranWater);
 
-		eWC = eWC + 1;
+//		eWC = eWC + 1;
 
 		wScore.add(100 - Math.abs((pWater - water) * (ranWater - ai) / 10));
-
+		//50-400
+		//0-150
+		
 		System.out.println(wScore.toString());
 		return "evaluated";
 	}
 
 	public String evaluatePes(int pes) {
 
-//		pes = 10;
+//		pes = 20;
 
-		ranPes = random(5, 10);
+		ranPes = random(1, 10);
 
 		System.out.println(ranPes);
 
-		ePC = ePC + 1;
+//		ePC = ePC + 1;
 
 		pScore.add(100 - Math.abs((pPes - pes) * (ranPes - ai) / 10));
-
+		//0-70
+		
 		System.out.println(pScore.toString());
 		return "evaluated";
 	}
 	
-	public String evaluateFinal() {
+	public double evaluateFinal() {
 		
 		int sumT = 0;
 		int sumH = 0;
@@ -154,7 +167,7 @@ public class Evaluator {
 		double finalScore = (aT*3+aH*1+aL*2+aW*3+aP*1)/10;
 		System.out.println(finalScore);
 		
-		return "evaluated";
+		return finalScore;
 	}
 	
 	public String evaluateAll(int t, int h, int l, int w, int p) {

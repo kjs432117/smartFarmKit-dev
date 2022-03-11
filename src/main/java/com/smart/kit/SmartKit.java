@@ -24,7 +24,7 @@ public class SmartKit {
 	Evaluator eva;
 	
 	private int status = 0;
-	private Date startDate;
+	static Date startDate;
 
 	private int temp;
 	private int hum;
@@ -42,7 +42,9 @@ public class SmartKit {
 	static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ");
 	static SimpleDateFormat formatCal = new SimpleDateFormat("HH");
 	
-	static String DEVICE_ID = "1";
+//	static String DEVICE_ID = "2";
+	static int kitNumber = 1;
+	static String plant = "딸기";
 	static int requiredDate = 14;
 	
 	static String currentDay;
@@ -64,9 +66,14 @@ public class SmartKit {
 	public String startGrow(int temp, int hum, int light, int water, int pes) {
 		
 		if(status==0) {
+			startDate = new Date();
+
 			List<String> log = new ArrayList<>();
 			
-			startDate = new Date();
+//			List<String> status = new ArrayList<>();
+//			status.add(Logger.DEVICE_ID);
+//			status.add(format.format(startDate));
+//			logger.dbWrite(status);
 			
 			log.add(format.format(startDate)+"재배 시작 설정값(온도:"+temp+"습도:"+hum+"일사량:"+light+"급액량:"+water+"농약량:"+pes+")");
 			
@@ -80,8 +87,8 @@ public class SmartKit {
 			this.pes = pes;
 			
 			Calendar cal = Calendar.getInstance();
-			cal.setTime(new Date());
-			cal.add(Calendar.DATE, requiredDate);
+			cal.setTime(startDate);
+			cal.add(Calendar.SECOND, requiredDate);
 			
 			String endDay = format.format(cal.getTime());
 			
@@ -93,8 +100,9 @@ public class SmartKit {
 				public void run() {
 					
 					if (endDay.equals(currentDay)) {
+						m_timer.cancel();
+						SmartKit.this.status = 2;
 						
-						stopGrow();
 					} else {
 						
 						currentTime = new Date();
@@ -153,6 +161,9 @@ public class SmartKit {
 		} else if(status==1) {
 			
 			return "Already Started";
+		} else if(status==2) {
+			
+			return "Grow Completed";
 		} else {
 			
 			return "Error";
@@ -164,31 +175,94 @@ public class SmartKit {
 	public String stopGrow() {
 		if(status == 0) {
 			return "Already Stopped";
-		}else if(status == 1) {
+		}else if(status == 2) {
 			status = 0;
+			startDate = null;
 			temp = 0;
 			hum = 0;
 			light = 0;
 			water = 0;
 			pes = 0;
+			lightStatus = "Off";
+			latestWaterTime = null;
+			latestPesTime = null;
+			
+			return "Canceled";
+		}else if(status == 1) {
+			status = 0;
+			startDate = null;
+			temp = 0;
+			hum = 0;
+			light = 0;
+			water = 0;
+			pes = 0;
+			lightStatus = "Off";
+			latestWaterTime = null;
+			latestPesTime = null;
+			
 			m_timer.cancel();
+			
 			return "Stop Grow";
 		}else {
 			return "Error";
 		}
 	}
 	
+//	재배완료
+	public String completeGrow() {
+		if(status == 2) {
+			List<String> db = new ArrayList<>();
+			int score = (int) Math.round(eva.evaluateFinal());
+			db.add(Integer.toString(score));
+			if(score <= 100 && score > 95) {
+				db.add("최상");
+			}else if(score <= 95 && score > 80) {
+				db.add("상");
+			}else if(score <= 80 && score > 50) {
+				db.add("중");
+			}else if(score <= 50 && score >= 0) {
+				db.add("하");
+			}else {
+				System.out.println("점수오류");
+				return "error";
+			}
+			db.add(plant);
+			db.add(format.format(startDate));
+			db.add(Integer.toString(kitNumber));
+			db.add(Logger.DEVICE_ID);
+			
+			status = 0;
+			startDate = null;
+			temp = 0;
+			hum = 0;
+			light = 0;
+			water = 0;
+			pes = 0;
+			lightStatus = "Off";
+			latestWaterTime = null;
+			latestPesTime = null;
+			
+			return logger.diaryWrite(db);
+		}else {
+			return "Error";
+		}
+	}
+	
+	
 //	재배값 변경
 	public String changeValue(int temp, int hum, int light, int water, int pes) {
 		if(status == 0) {
 			return "Start Grow First";
+		}else if(status == 1 &this.temp==temp&this.hum==hum&this.light==light&this.water==water&this.pes==pes) {
+			return "Same value as the current";
+		}else if(status == 2) {
+			return "Grow Completed";
 		}else if(status == 1) {
 			this.temp = temp;
 			this.hum = hum;
 			this.light = light;
 			this.water = water;
 			this.pes = pes;
-			
 			return "Grow Value Changed";
 		}else {
 			return "Error";

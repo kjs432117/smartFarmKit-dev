@@ -19,8 +19,6 @@ import com.google.gson.Gson;
 @Component
 public class Logger {
 	
-	// 하남자 특) 주석 닮
-	
 	@Value("${server.port}")
 //	private int port;
 	

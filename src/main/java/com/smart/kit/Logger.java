@@ -22,7 +22,7 @@ public class Logger {
 	@Value("${server.port}")
 //	private int port;
 	
-	static String DEVICE_ID = "32";
+	static String DEVICE_ID = "34";
 	static String address;
 	static int port = 81;
 	
@@ -30,6 +30,7 @@ public class Logger {
 		try {
 			InetAddress ip = InetAddress.getLocalHost();
 			address = ip.getHostAddress() + ":" + port;
+//			address = "192.168.0.24:82";
 			
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -100,6 +101,25 @@ public class Logger {
 //		return "Status-updated";
 //	}
 	
+	//Diary&Write
+	public String plantWrite(List<String> db) {
+		
+		HttpHeaders headers = new HttpHeaders();
+		// 파라미터 설정 
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>(); 
+		String json = new Gson().toJson(db);
+		// params.add("key", "value");
+		params.add("kit", json); 
+		// Request 설정 
+		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+		RestTemplate restTemplate = new RestTemplate();
+		String url = "http://localhost:80/prj/plantWrite.do"; 
+		String response = restTemplate.postForObject(url, request, String.class);
+		System.out.println(response); 
+		
+		return "Plant-updated";
+	}
+	
 	//DiaryWrite
 	public String diaryWrite(List<String> db) {
 		
@@ -116,7 +136,7 @@ public class Logger {
 		String response = restTemplate.postForObject(url, request, String.class);
 		System.out.println(response); 
 		
-		return "Diary-updated";
+		return "Diary&Plant-updated";
 	}
 
 

@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,12 +18,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.Gson;
+
 @CrossOrigin
 @RestController
 public class SmartKitController {
 
 	@Autowired
 	SmartKit smartKit;
+	
+	@Autowired
+	Evaluator eva;
 
 	//재배시작
 	@RequestMapping(method = RequestMethod.GET, path = "/startGrow")
@@ -32,8 +38,9 @@ public class SmartKitController {
 		int light = Integer.parseInt(request.getParameter("light"));
 		int water = Integer.parseInt(request.getParameter("water"));
 		int pes = Integer.parseInt(request.getParameter("pes"));
+		int auto = Integer.parseInt(request.getParameter("auto")); 
 
-		String result = smartKit.startGrow(temp, hum, light, water, pes);
+		String result = smartKit.startGrow(temp, hum, light, water, pes, auto);
 
 		return result;
 	}
@@ -48,6 +55,7 @@ public class SmartKitController {
 	//재배완료
 	@RequestMapping(method = RequestMethod.GET, path = "/complete")
 	public String complete() {
+		
 		String result = smartKit.completeGrow();
 
 		return result;
@@ -60,12 +68,13 @@ public class SmartKitController {
 		int light = Integer.parseInt(request.getParameter("light"));
 		int water = Integer.parseInt(request.getParameter("water"));
 		int pes = Integer.parseInt(request.getParameter("pes"));
+		int auto = Integer.parseInt(request.getParameter("auto")); 
 
-		String result = smartKit.changeValue(temp, hum, light, water, pes);
+		String result = smartKit.changeValue(temp, hum, light, water, pes, auto);
 
 		return result;
 	}
-	
+	//재배상태확인
 	@RequestMapping(method = RequestMethod.GET, path = "/checkGrow")
 	@ResponseBody
 	public Map<String, String> checkValue() {
@@ -79,72 +88,114 @@ public class SmartKitController {
 		now = format.format(currentTime);
 
 			
-			Date s_date = null;
-			Date c_date = null;
-			Date e_date = null;
-			int diffDays = 0;
+		Date s_date = null;
+		Date c_date = null;
+		Date e_date = null;
+		int diffDays = 0;
 			
-			if(SmartKit.startDate!=null) {
-				try {
-					
-					s_date = SmartKit.startDate;
-					cal.setTime(s_date);
-					cal.add(Calendar.DATE, SmartKit.requiredDate);
-					c_date = format.parse(now);
-					e_date = format.parse(format.format(cal.getTime()));
-				} catch (ParseException e) {
-					e.printStackTrace();
-				}
-				float diffSec = (c_date.getTime() - s_date.getTime()) / 1000; //초 차이
-				System.out.println(diffSec);
-				diffDays = Math.round(diffSec*100/(SmartKit.requiredDate)); //일자수 차이
+		if(SmartKit.startDate!=null) {
+			try {
+				
+				s_date = SmartKit.startDate;
+				cal.setTime(s_date);
+				cal.add(Calendar.DATE, SmartKit.requiredDate);
+				c_date = format.parse(now);
+				e_date = format.parse(format.format(cal.getTime()));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			float diffSec = (c_date.getTime() - s_date.getTime()) / 1000; //초 차이
+			System.out.println(diffSec);
+			diffDays = Math.round(diffSec*100/(SmartKit.requiredDate)); //일자수 차이
 //				diffDays = Math.round(diffSec*100/(60*SmartKit.requiredDate)); //일자수 차이
 //				diffDays = Math.round(diffSec*100/(24*60*60*SmartKit.requiredDate)); //일자수 차이
-				System.out.println(diffDays);
-			}
+			System.out.println(diffDays);
+		}
 			
 		if (smartKit.getStatus() == 0) {
 			growInfo.put("message", "Kit Stand-by");
 			growInfo.put("status", Integer.toString(smartKit.getStatus()));
 			growInfo.put("id", Logger.DEVICE_ID);
 			growInfo.put("percent", "재배를 시작해 주세요");
+//			growInfo.put("kitNo", Integer.toString(SmartKit.kitNumber));
 			return growInfo;
 			
 		} else if (smartKit.getStatus() == 2) {
-			growInfo.put("message", "Ready for complete");
-			System.out.println(SmartKit.format.format(SmartKit.startDate));
-			growInfo.put("status", Integer.toString(smartKit.getStatus()));
-			growInfo.put("startDate", SmartKit.format.format(SmartKit.startDate));
-			growInfo.put("temp", Integer.toString(smartKit.getTemp()));
-			growInfo.put("hum", Integer.toString(smartKit.getHum()));
-			growInfo.put("light", Integer.toString(smartKit.getLight()));
-			growInfo.put("water", Integer.toString(smartKit.getWater()));
-			growInfo.put("pes", Integer.toString(smartKit.getPes()));
-			growInfo.put("id", Logger.DEVICE_ID);
-			growInfo.put("required", Integer.toString(SmartKit.requiredDate));
-			growInfo.put("end", format.format(e_date));
-			growInfo.put("percent", Integer.toString(100));
-			return growInfo;
 			
+			if(smartKit.getAuto() == 1) {
+				growInfo.put("message", "ready(auto)");
+				growInfo.put("status", Integer.toString(smartKit.getStatus()));
+				growInfo.put("startDate", SmartKit.format.format(SmartKit.startDate));
+				growInfo.put("auto", Integer.toString(smartKit.getAuto()));
+				growInfo.put("id", Logger.DEVICE_ID);
+				growInfo.put("required", Integer.toString(SmartKit.requiredDate));
+				growInfo.put("end", format.format(e_date));
+				growInfo.put("percent", Integer.toString(100));
+//				growInfo.put("kitNo", Integer.toString(SmartKit.kitNumber));
+				return growInfo;
+			} else if(smartKit.getAuto() == 0) {
+				growInfo.put("message", "Ready for complete");
+				System.out.println(SmartKit.format.format(SmartKit.startDate));
+				growInfo.put("status", Integer.toString(smartKit.getStatus()));
+				growInfo.put("startDate", SmartKit.format.format(SmartKit.startDate));
+				growInfo.put("temp", Integer.toString(smartKit.getTemp()));
+				growInfo.put("hum", Integer.toString(smartKit.getHum()));
+				growInfo.put("light", Integer.toString(smartKit.getLight()));
+				growInfo.put("water", Integer.toString(smartKit.getWater()));
+				growInfo.put("pes", Integer.toString(smartKit.getPes()));
+				growInfo.put("id", Logger.DEVICE_ID);
+				growInfo.put("required", Integer.toString(SmartKit.requiredDate));
+				growInfo.put("end", format.format(e_date));
+				growInfo.put("percent", Integer.toString(100));
+				growInfo.put("score", Integer.toString((int)eva.evaluateFinal()));
+//				growInfo.put("kitNo", Integer.toString(SmartKit.kitNumber));
+				return growInfo;
+			} else {
+				growInfo.put("message", "Error");
+				growInfo.put("id", Logger.DEVICE_ID);
+//				growInfo.put("kitNo", Integer.toString(SmartKit.kitNumber));
+				return growInfo;
+			}
 		} else if (smartKit.getStatus() == 1) {
-			growInfo.put("message", "On growing");
-			System.out.println(SmartKit.format.format(SmartKit.startDate));
-			growInfo.put("status", Integer.toString(smartKit.getStatus()));
-			growInfo.put("startDate", SmartKit.format.format(SmartKit.startDate));
-			growInfo.put("temp", Integer.toString(smartKit.getTemp()));
-			growInfo.put("hum", Integer.toString(smartKit.getHum()));
-			growInfo.put("light", Integer.toString(smartKit.getLight()));
-			growInfo.put("water", Integer.toString(smartKit.getWater()));
-			growInfo.put("pes", Integer.toString(smartKit.getPes()));
-			growInfo.put("id", Logger.DEVICE_ID);
-			growInfo.put("required", Integer.toString(SmartKit.requiredDate));
-			growInfo.put("end", format.format(e_date));
-			growInfo.put("percent", Integer.toString(diffDays));
-			return growInfo;
+			if(smartKit.getAuto() == 1) {
+				growInfo.put("message", "On Auto growing");
+				growInfo.put("status", Integer.toString(smartKit.getStatus()));
+				growInfo.put("startDate", SmartKit.format.format(SmartKit.startDate));
+				growInfo.put("auto", Integer.toString(smartKit.getAuto()));
+				growInfo.put("id", Logger.DEVICE_ID);
+				growInfo.put("required", Integer.toString(SmartKit.requiredDate));
+				growInfo.put("end", format.format(e_date));
+				growInfo.put("percent", Integer.toString(diffDays));
+//				growInfo.put("kitNo", Integer.toString(SmartKit.kitNumber));
+				return growInfo;
+			} else if(smartKit.getAuto() == 0) {
+				growInfo.put("message", "On growing");
+				System.out.println(SmartKit.format.format(SmartKit.startDate));
+				growInfo.put("status", Integer.toString(smartKit.getStatus()));
+				growInfo.put("startDate", SmartKit.format.format(SmartKit.startDate));
+				growInfo.put("temp", Integer.toString(smartKit.getTemp()));
+				growInfo.put("hum", Integer.toString(smartKit.getHum()));
+				growInfo.put("light", Integer.toString(smartKit.getLight()));
+				growInfo.put("water", Integer.toString(smartKit.getWater()));
+				growInfo.put("pes", Integer.toString(smartKit.getPes()));
+				growInfo.put("auto", Integer.toString(smartKit.getAuto()));
+				growInfo.put("id", Logger.DEVICE_ID);
+				growInfo.put("required", Integer.toString(SmartKit.requiredDate));
+				growInfo.put("end", format.format(e_date));
+				growInfo.put("percent", Integer.toString(diffDays));
+//				growInfo.put("kitNo", Integer.toString(SmartKit.kitNumber));
+				return growInfo;
+			} else {
+				growInfo.put("message", "Error");
+				growInfo.put("id", Logger.DEVICE_ID);
+//				growInfo.put("kitNo", Integer.toString(SmartKit.kitNumber));
+				return growInfo;
+			}
 			
 		} else {
 			growInfo.put("message", "Error");
 			growInfo.put("id", Logger.DEVICE_ID);
+//			growInfo.put("kitNo", Integer.toString(SmartKit.kitNumber));
 			return growInfo;
 		}
 	}
@@ -156,6 +207,24 @@ public class SmartKitController {
 				Integer.parseInt(request.getParameter("currentHum")));
 
 		return "Test Value Sent";
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, path = "/sensorReady")
+	public List<Integer> sensorReady() {
+
+//		Evaluator e = new Evaluator();
+//		String watt = Integer.toString(e.random(0, 60));
+		return smartKit.dat;
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, path = "/sensor")
+	public String sensor() {
+
+//		Evaluator e = new Evaluator();
+//		String watt = Integer.toString(e.random(0, 60));
+		String watt = Integer.toString(smartKit.getCurrentTemp());
+		System.out.println(watt);
+		return watt;
 	}
 
 }

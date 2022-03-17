@@ -319,8 +319,7 @@ public class SmartKit {
 	public String changeValue(int temp, int hum, int light, int water, int pes, int auto) {
 		if (status == 0) {
 			return "Start Grow First";
-		} else if (status == 1 & this.temp == temp & this.hum == hum & this.light == light & this.water == water
-				& this.pes == pes) {
+		} else if (status == 1 & this.temp == temp & this.hum == hum & this.light == light & this.water == water & this.pes == pes & this.auto == auto) {
 			return "Same value as the current";
 		} else if (status == 2) {
 			return "Grow Completed";

@@ -68,6 +68,9 @@ public class SmartKit {
 //	타이머(스케쥴러용)
 	private Timer m_timer;
 
+//	로그
+	List<String> log = new ArrayList<>();
+
 //	누적 실시간데이터용
 //	List<Integer> dat = new ArrayList<>(40);
 
@@ -93,7 +96,6 @@ public class SmartKit {
 		if (status == 0) {
 			startDate = new Date();
 
-			List<String> log = new ArrayList<>();
 
 //			List<String> status = new ArrayList<>();
 //			status.add(Logger.DEVICE_ID);
@@ -132,7 +134,11 @@ public class SmartKit {
 //					System.out.println(dat.size());
 					if (endDay.equals(currentDay)) {
 						m_timer.cancel();
-
+						if(SmartKit.this.auto == 0) {
+							log.add(currentDay + "재배완료");
+							logger.write(log);
+							log.clear();
+						}
 						SmartKit.this.status = 2;
 
 					} else {
@@ -221,6 +227,11 @@ public class SmartKit {
 		if (status == 0) {
 			return "Already Stopped";
 		} else if (status == 2) {
+			if(auto == 0) {
+				log.add(currentDay+"재배취소");
+				logger.write(log);
+				log.clear();
+			}
 			status = 0;
 			startDate = null;
 			temp = 0;
@@ -231,9 +242,14 @@ public class SmartKit {
 			lightStatus = "Off";
 			latestWaterTime = null;
 			latestPesTime = null;
-
+			
 			return "Canceled";
 		} else if (status == 1) {
+			if(auto == 0) {
+				log.add(currentDay+"재배취소");
+				logger.write(log);
+				log.clear();
+			}
 			status = 0;
 			startDate = null;
 			temp = 0;
@@ -330,6 +346,7 @@ public class SmartKit {
 			this.water = water;
 			this.pes = pes;
 			this.auto = auto;
+			log.add(format.format(startDate) + "재배 시작 설정값(온도:" + temp + "습도:" + hum + "일사량:" + light + "급액량:" + water + "농약량:" + pes + ")");
 			return "Grow Value Changed";
 		} else {
 			return "Error";

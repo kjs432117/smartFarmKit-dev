@@ -59,7 +59,7 @@ public class SmartKit {
 	static String plant = "딸기";
 	static int requiredDate = 14;
 	static String plantClass = "과일";
-	static int plantCount = 5;
+	static int plantCount = 1;
 
 //	현재시간
 	static String currentDay;

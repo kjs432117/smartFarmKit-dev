@@ -34,8 +34,8 @@ public class Logger {
 		try {
 			InetAddress ip = InetAddress.getLocalHost();
 //			address = ip.getHostAddress() + ":" + port;
-			address = "192.168.0.24:81";
-//			address = "3.36.147.14:81";
+//			address = "192.168.0.24:81";
+			address = "3.36.147.14:81";
 			
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -58,8 +58,8 @@ public class Logger {
 		RestTemplate restTemplate = new RestTemplate();
 		
 //		String url = "http://192.168.0.35:80/prj/addressUpdate.do";
-		String url = "http://localhost:80/prj/addressUpdate.do";
-//		String url = "http://3.36.147.14:8080/prj/addressUpdate.do";
+//		String url = "http://localhost:80/prj/addressUpdate.do";
+		String url = "http://3.36.147.14:8080/smart/addressUpdate.do";
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 		
 		String response = restTemplate.postForObject(url, request, String.class);
@@ -83,8 +83,8 @@ public class Logger {
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 		RestTemplate restTemplate = new RestTemplate();
 //		String url = "http://192.168.0.35:80/prj/logger.do";
-		String url = "http://localhost:80/prj/logger.do"; 
-//		String url = "http://3.36.147.14:8080/prj/logger.do"; 
+//		String url = "http://localhost:80/prj/logger.do"; 
+		String url = "http://3.36.147.14:8080/smart/logger.do"; 
 		String response = restTemplate.postForObject(url, request, String.class);
 		System.out.println(response); 
 		
@@ -104,8 +104,8 @@ public class Logger {
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 		RestTemplate restTemplate = new RestTemplate();
 //		String url = "http://192.168.0.35:80/prj/plantWrite.do";
-		String url = "http://localhost:80/prj/plantWrite.do"; 
-//		String url = "http://3.36.147.14:8080/prj/plantWrite.do"; 
+//		String url = "http://localhost:80/prj/plantWrite.do"; 
+		String url = "http://3.36.147.14:8080/smart/plantWrite.do"; 
 		String response = restTemplate.postForObject(url, request, String.class);
 		System.out.println(response); 
 		
@@ -125,8 +125,8 @@ public class Logger {
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 		RestTemplate restTemplate = new RestTemplate();
 //		String url = "http://192.168.0.35:80/prj/diaryWrite.do";
-		String url = "http://localhost:80/prj/diaryWrite.do"; 
-//		String url = "http://3.36.147.14:8080/prj/diaryWrite.do"; 
+//		String url = "http://localhost:80/prj/diaryWrite.do"; 
+		String url = "http://3.36.147.14:8080/smart/diaryWrite.do"; 
 		String response = restTemplate.postForObject(url, request, String.class);
 		System.out.println(response); 
 		
